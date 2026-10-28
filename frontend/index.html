@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DPP Compliance Checker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>DPP Compliance Checker</h1>
+      <p>Asset Administration Shell &middot; IDTA 02099-1</p>
+    </header>
+
+    <section id="drop" class="drop" tabindex="0" role="button" aria-label="Drop or select a file">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5m0 0l-4 4m4-4l4 4M5 19h14"/></svg>
+      <p>Drop or select a file here</p>
+      <small>AAS JSON &middot; up to 10 MB</small>
+      <input id="file" type="file" accept=".json,application/json" hidden>
+    </section>
+
+    <section id="results" hidden>
+      <div id="summary"></div>
+      <ol id="steps"></ol>
+      <button id="reset" class="reset" hidden>Check another file</button>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

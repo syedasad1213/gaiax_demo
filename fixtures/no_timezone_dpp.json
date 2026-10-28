@@ -1,0 +1,408 @@
+{
+  "assetAdministrationShells": [
+    {
+      "modelType": "AssetAdministrationShell",
+      "id": "https://example.com/ids/aas/endmill-0001",
+      "idShort": "SolidCarbideEndMill",
+      "assetInformation": {
+        "assetKind": "Instance",
+        "globalAssetId": "https://example.com/products/endmill-0001"
+      },
+      "submodels": [
+        {
+          "type": "ModelReference",
+          "keys": [
+            {
+              "type": "Submodel",
+              "value": "https://example.com/ids/sm/nameplate/endmill-0001"
+            }
+          ]
+        },
+        {
+          "type": "ModelReference",
+          "keys": [
+            {
+              "type": "Submodel",
+              "value": "https://example.com/ids/sm/dpp-metadata/endmill-0001"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "submodels": [
+    {
+      "modelType": "Submodel",
+      "id": "https://example.com/ids/sm/nameplate/endmill-0001",
+      "idShort": "Nameplate",
+      "submodelElements": [
+        {
+          "idShort": "ManufacturerProductDesignation",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "ManufacturerProductDesignation"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of ManufacturerProductDesignation."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/ManufacturerProductDesignation/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "Fictional end mill 6 mm"
+        }
+      ]
+    },
+    {
+      "modelType": "Submodel",
+      "id": "https://example.com/ids/sm/dpp-metadata/endmill-0001",
+      "idShort": "DppMetadata",
+      "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+          {
+            "type": "GlobalReference",
+            "value": "https://admin-shell.io/idta/cds/dppMetadata/1"
+          }
+        ]
+      },
+      "submodelElements": [
+        {
+          "idShort": "contentSpecificationIds",
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/contentSpecificationIds/1"
+              }
+            ]
+          },
+          "orderRelevant": false,
+          "typeValueListElement": "Property",
+          "valueTypeListElement": "xs:string",
+          "modelType": "SubmodelElementList",
+          "value": [
+            {
+              "semanticId": {
+                "type": "ExternalReference",
+                "keys": [
+                  {
+                    "type": "GlobalReference",
+                    "value": "https://admin-shell.io/idta/cds/contentSpecificationId/1"
+                  }
+                ]
+              },
+              "modelType": "Property",
+              "valueType": "xs:string",
+              "value": "https://admin-shell.io/idta/CarbonFootprint/CarbonFootprint/1/0"
+            }
+          ]
+        },
+        {
+          "idShort": "facilityId",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "facilityId"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of facilityId."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/facilityId/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "gxx:xxx987654"
+        },
+        {
+          "idShort": "economicOperatorId",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "economicOperatorId"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of economicOperatorId."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/economicOperatorId/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "gxx:ppp456789"
+        },
+        {
+          "idShort": "lastUpdate",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "lastUpdate"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of lastUpdate."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/lastUpdate/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:dateTime",
+          "value": "2026-10-21T15:53:00"
+        },
+        {
+          "idShort": "dppStatus",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "dppStatus"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of dppStatus."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/dppStatus/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "Active"
+        },
+        {
+          "idShort": "dppSchemaVersion",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "dppSchemaVersion"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of dppSchemaVersion."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/dppSchemaVersion/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "ENXXX:v1.0"
+        },
+        {
+          "idShort": "granularity",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "granularity"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of granularity."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/granularity/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "Item"
+        },
+        {
+          "idShort": "uniqueProductIdentifier",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "uniqueProductIdentifier"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of uniqueProductIdentifier."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/uniqueProductIdentifier/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "https://example.com/products/endmill-0001"
+        },
+        {
+          "idShort": "digitalProductPassportId",
+          "displayName": [
+            {
+              "language": "en",
+              "text": "digitalProductPassportId"
+            }
+          ],
+          "description": [
+            {
+              "language": "en",
+              "text": "Synthetic description of digitalProductPassportId."
+            }
+          ],
+          "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+              {
+                "type": "GlobalReference",
+                "value": "https://admin-shell.io/idta/cds/digitalProductPassportId/1"
+              }
+            ]
+          },
+          "qualifiers": [
+            {
+              "type": "ExampleValue",
+              "valueType": "xs:string",
+              "value": "n/a"
+            }
+          ],
+          "modelType": "Property",
+          "valueType": "xs:string",
+          "value": "https://example.com/dpp/endmill-0001"
+        }
+      ]
+    }
+  ],
+  "conceptDescriptions": [
+    {
+      "modelType": "ConceptDescription",
+      "id": "https://admin-shell.io/idta/cds/lastUpdate/1",
+      "idShort": "lastUpdate"
+    },
+    {
+      "modelType": "ConceptDescription",
+      "id": "https://admin-shell.io/idta/cds/dppStatus/1",
+      "idShort": "dppStatus"
+    }
+  ]
+}
