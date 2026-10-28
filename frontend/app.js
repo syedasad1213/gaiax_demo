@@ -27,7 +27,7 @@ function stepOf(r) {
   if (id.startsWith("JSON-") || id === "ROOT-OBJECT" || id === "INTERNAL") return "file";
   if (id.startsWith("ROOT-") || id.startsWith("AAS-") || id.startsWith("DPP-SUBMODEL")) return "aas";
   if (id.startsWith("MAND-")) return "mandatory";
-  if (id.startsWith("TYPE-") || id.startsWith("ELEM-") || id.startsWith("OPT-") || id === "DPP-IDSHORT") return "attrs";
+  if (id.startsWith("TYPE-") || id.startsWith("ELEM-") || id.startsWith("OPT-") || id.startsWith("CARD-") || id === "DPP-IDSHORT") return "attrs";
   if (id.startsWith("DT-")) return "datetime";
   if (id.startsWith("SEM-") || id.startsWith("VAL-") || id === "DPP-SEMANTIC") return "semantic";
   if (id.startsWith("ID-")) return "identifiers";
@@ -107,7 +107,9 @@ function checkRow(r) {
 function checksList(rs) { return h("div", { class: "rows" }, rs.map(checkRow)); }
 
 function attributeTable(rs, dpp) {
-  const rows = KNOWN.map(([id, mandatory]) => {
+  const rows = KNOWN.map(([id, specMandatory]) => {
+    const card = dpp && dpp[id] && (dpp[id].qualifiers || []).find((q) => q && q.type === "SMT/Cardinality");
+    const mandatory = card ? ["One", "OneToMany"].includes(card.value) : specMandatory;
     const mine = rs.concat(window.__allResults || []).filter((r) =>
       /^(TYPE|MAND|OPT)-/.test(r.check_id) && r.check_id.split("-").pop() === id);
     const el = dpp && dpp[id];
@@ -176,7 +178,7 @@ function layerChips(results) {
   }));
 }
 
-function renderSummary(report) {
+function renderSummary(report, parsed) {
   const ok = report.verdict === "COMPLIANT";
   const c = (s) => report.results.filter((r) => r.status === s).length;
   const parts = [`${c("PASS")} passed`, `${c("FAIL")} failed`];
@@ -187,7 +189,12 @@ function renderSummary(report) {
          : null;
   return h("div", {},
     h("div", { class: "verdict" }, icon(ok ? "pass" : "fail"),
-      h("div", {}, h("h2", {}, ok ? "Compliant" : "Not compliant"), h("p", {}, `${report.path} · ${parts.join(" · ")}`))),
+      h("div", { class: "text-col" }, h("h2", {}, ok ? "Compliant" : "Not compliant"),
+        h("p", {}, `${report.path} · ${parts.join(" · ")}`)),
+      parsed && typeof parsed === "object"
+        ? h("img", { class: "tool", src: toolImageFor(parsed), alt: "Milling cutter",
+                     onerror: (e) => e.target.remove() })
+        : null),
     layerChips(report.results),
     note ? h("p", { class: "note" + (ok ? "" : " bad") }, note) : null);
 }
@@ -206,8 +213,8 @@ async function handleFile(file) {
 
   if (file.size > MAX_BYTES) return showError("File is larger than 10 MB.");
 
-  let dpp = null;
-  try { dpp = extractDpp(JSON.parse(await file.text())); } catch { /* backend reports the problem */ }
+  let parsed = null, dpp = null;
+  try { parsed = JSON.parse(await file.text()); dpp = extractDpp(parsed); } catch { /* backend reports the problem */ }
 
   let report;
   try {
@@ -233,7 +240,7 @@ async function handleFile(file) {
     await sleep(STEP_DELAY);
     finishStep(li, step, groups[step.key], dpp);
   }
-  summary.replaceChildren(renderSummary(report));
+  summary.replaceChildren(renderSummary(report, parsed));;
   const firstBad = lis.find((li) => ["fail", "warn"].includes(li.dataset.status));
   if (firstBad) firstBad.querySelector(".step-head").click();
   resetBtn.hidden = false;
@@ -246,6 +253,10 @@ function showError(msg) {
 function reset() {
   runId++; results.hidden = true; drop.classList.remove("hide"); fileInput.value = "";
   stepsEl.replaceChildren(); summary.replaceChildren(); delete window.__allResults;
+}
+
+function toolImageFor(parsed) {
+  return "img/milling-cutter.png";
 }
 
 drop.addEventListener("click", () => fileInput.click());

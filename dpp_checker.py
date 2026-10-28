@@ -562,11 +562,33 @@ def _has_value(el: dict) -> bool:
         return len(v) > 0
     return True
 
+CARDINALITY_SEMANTIC_ID = "https://admin-shell.io/SubmodelTemplates/Cardinality/1/0"
+
+def declared_cardinality(el):
+    """Value of the SMT/Cardinality qualifier (One, ZeroToOne, OneToMany, ZeroToMany) or None."""
+    quals = el.get("qualifiers") if isinstance(el, dict) else None
+    if not isinstance(quals, list):
+        return None
+    for q in quals:
+        if isinstance(q, dict) and (q.get("type") == "SMT/Cardinality"
+                or CARDINALITY_SEMANTIC_ID in reference_values(q.get("semanticId"))):
+            return q.get("value") if isinstance(q.get("value"), str) else None
+    return None
+
+def effective_mandatory(rule, el):
+    card = declared_cardinality(el)
+    if card in ("One", "OneToMany"):
+        return True
+    if card in ("ZeroToOne", "ZeroToMany"):
+        return False
+    return rule.mandatory          # no/unknown qualifier, or element absent: spec default
 
 def check_mandatory_attributes(index: ElementIndex, cfg: CheckerConfig) -> List[CheckResult]:
     out: List[CheckResult] = []
-    for rule in (r for r in ATTRIBUTE_RULES if r.mandatory):
+    for rule in ATTRIBUTE_RULES:
         a = rule.id_short
+        if not effective_mandatory(rule, index.elements.get(a)):
+            continue
         loc = f"submodelElements[idShort={a}]"
         mk = lambda st, msg, **kw: out.append(_R(  # noqa: E731
             f"MAND-{a}", f"Mandatory attribute '{a}' present", LAYER_IDTA, CAT_MAND,
@@ -716,8 +738,10 @@ def check_attribute_types(index: ElementIndex, cfg: CheckerConfig) -> List[Check
 def check_optional_attributes(index: ElementIndex, cfg: CheckerConfig) -> List[CheckResult]:
     """Check 5: absence is fine; presence is judged by the type checks above."""
     out: List[CheckResult] = []
-    for rule in (r for r in ATTRIBUTE_RULES if not r.mandatory):
+    for rule in ATTRIBUTE_RULES:
         a = rule.id_short
+        if effective_mandatory(rule, index.elements.get(a)):
+            continue
         loc = f"submodelElements[idShort={a}]"
         mk = lambda st, msg, **kw: out.append(_R(  # noqa: E731
             f"OPT-{a}", f"Optional attribute '{a}'", LAYER_IDTA, CAT_OPT, loc, st, msg,
@@ -733,6 +757,23 @@ def check_optional_attributes(index: ElementIndex, cfg: CheckerConfig) -> List[C
             mk(PASS, "Present; structure/type results are reported by the TYPE checks.")
     return out
 
+# run compliance checks
+def check_cardinality_consistency(index, cfg):
+    out = []
+    for rule in ATTRIBUTE_RULES:
+        el = index.elements.get(rule.id_short)
+        card = declared_cardinality(el) if el else None
+        if card is None:
+            continue
+        declared = card in ("One", "OneToMany")
+        out.append(_R(f"CARD-{rule.id_short}", f"Cardinality of '{rule.id_short}' matches IDTA 02099-1",
+                      LAYER_IDTA, CAT_STRUCT, f"submodelElements[idShort={rule.id_short}].qualifiers",
+                      PASS if declared == rule.mandatory else WARN,
+                      "Qualifier agrees with the specification." if declared == rule.mandatory
+                      else "Qualifier disagrees with the specification table.",
+                      expected="mandatory" if rule.mandatory else "optional",
+                      actual=card, source=SRC_IDTA_SM))
+    return out
 
 # --------------------------------------------------------------------------
 # Check 4: date-time

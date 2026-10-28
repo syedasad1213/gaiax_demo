@@ -107,6 +107,11 @@ ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10p
 .reset:hover{border-color:var(--accent)}
 .reset:focus-visible{outline:2px solid var(--accent)}
 
+.brand{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-bottom:22px}
+.logo{height:40px;width:auto;display:block}
+.verdict .tool{margin-left:auto;height:64px;width:auto;flex:none;animation:rise .5s ease both}
+.verdict .text-col{min-width:0}
+@media (max-width:520px){.verdict .tool{display:none}}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes turn{to{transform:rotate(360deg)}}
