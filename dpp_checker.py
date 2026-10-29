@@ -36,8 +36,7 @@ PASS, FAIL, WARN, SKIP = "PASS", "FAIL", "WARN", "SKIP"
 LAYER_JSON = "1 JSON"
 LAYER_AAS = "2 AAS structure"
 LAYER_IDTA = "3 IDTA 02099-1"
-LAYER_EN = "4 EN 18223 / EN 18219"
-LAYERS = (LAYER_JSON, LAYER_AAS, LAYER_IDTA, LAYER_EN)
+LAYERS = (LAYER_JSON, LAYER_AAS, LAYER_IDTA)
 
 CAT_INPUT = "INPUT_FILE"
 CAT_STRUCT = "STRUCTURAL"
@@ -53,8 +52,6 @@ SRC_IDTA = "IDTA 02099-1 v1.0 (28.05.2026)"
 SRC_IDTA_SM = SRC_IDTA + ", section 3.1"
 SRC_IDTA_SML = SRC_IDTA + ", section 3.2"
 SRC_AAS = "AAS metamodel (IDTA-01001); exact version/clause not verified"
-SRC_EN = ("EN 18223:2026 / EN 18219:2026 - full text NOT available; "
-          "only as quoted in " + SRC_IDTA_SM)
 SRC_PROBLEM = "Problem statement (project requirement, not a standard)"
 
 _CDS = "https://admin-shell.io/idta/cds/"  # semanticId namespace, IDTA 02099-1
@@ -135,7 +132,9 @@ class CheckerConfig:
     # a non-zero offset is acceptable is not verifiable -> require_utc=False.
     require_timezone: bool = True
     require_utc: bool = False
-
+    # Plausibility of lastUpdate (NOT defined by IDTA 02099-1): reported as WARN. None = off.
+    future_tolerance_minutes: Optional[int] = 5
+    earliest_plausible_year: Optional[int] = 2000
     # IDTA 02099-1 defines Model/Item/Batch for granularity (section 3.1).
     allowed_granularity: Optional[Tuple[str, ...]] = ("Model", "Item", "Batch")
     # Spec: no enumeration for dppStatus (only example "Active") -> None.
@@ -757,7 +756,6 @@ def check_optional_attributes(index: ElementIndex, cfg: CheckerConfig) -> List[C
             mk(PASS, "Present; structure/type results are reported by the TYPE checks.")
     return out
 
-# run compliance checks
 def check_cardinality_consistency(index, cfg):
     out = []
     for rule in ATTRIBUTE_RULES:
@@ -877,7 +875,7 @@ def check_datetime(index: ElementIndex, cfg: CheckerConfig) -> List[CheckResult]
     else:
         add("offset", "Timezone offset valid", CAT_DT, SKIP, "No timezone designator present.")
 
-    if an.errors:
+    if an.errors or an.offset_error:
         add("profile", "Profile: timezone requirement", CAT_DT, SKIP,
             "Not evaluated: timestamp not well-formed.")
         return out
@@ -891,6 +889,20 @@ def check_datetime(index: ElementIndex, cfg: CheckerConfig) -> List[CheckResult]
         else "Satisfies the configured timezone profile.",
         expected=("timezone-aware" + (", UTC" if cfg.require_utc else "")) if cfg.require_timezone else "any",
         actual=safe_repr(v))
+    if an.parsed is not None and (cfg.future_tolerance_minutes is not None
+                                  or cfg.earliest_plausible_year is not None):
+        ts = an.parsed if an.parsed.tzinfo else an.parsed.replace(tzinfo=timezone.utc)
+        msgs = []
+        if (cfg.future_tolerance_minutes is not None
+                and ts > datetime.now(timezone.utc) + timedelta(minutes=cfg.future_tolerance_minutes)):
+            msgs.append("timestamp is in the future")
+        if cfg.earliest_plausible_year is not None and ts.year < cfg.earliest_plausible_year:
+            msgs.append(f"year is before {cfg.earliest_plausible_year}")
+        add("plausible", "Plausibility (project rule, not in the specification)", CAT_DT,
+            WARN if msgs else PASS,
+            ("Valid timestamp but implausible: " + "; ".join(msgs) + ".") if msgs
+            else "Not in the future and not unusually old.",
+            actual=safe_repr(v))
     return out
 
 
@@ -929,29 +941,29 @@ def check_value_rules(index: ElementIndex, cfg: CheckerConfig) -> List[CheckResu
     return out
 
 
-def check_identifier_rules(index: ElementIndex, cfg: CheckerConfig) -> List[CheckResult]:
-    """Layer 4: EN 18219 formats. No built-in rules (text unavailable)."""
-    out: List[CheckResult] = []
-    for a in ("uniqueProductIdentifier", "economicOperatorId", "facilityId"):
-        el = index.elements.get(a)
-        if el is None or a in index.duplicates or not isinstance(el.get("value"), str):
-            continue
-        loc = f"submodelElements[idShort={a}].value"
-        fn = cfg.identifier_validators.get(a)
-        if fn is None:
-            out.append(_R(f"ID-{a}", f"EN 18219 identifier format of '{a}'", LAYER_EN, CAT_VALUE, loc,
-                          SKIP, "Not evaluated: EN 18219:2026 rules are not built in (text not available); "
-                                "register a validator in CheckerConfig.identifier_validators.",
-                          source=SRC_EN))
-            continue
-        try:
-            err = fn(el["value"])
-        except Exception as exc:                     # a user validator must not crash the run
-            err = f"validator raised {type(exc).__name__}: {exc}"
-        out.append(_R(f"ID-{a}", f"EN 18219 identifier format of '{a}'", LAYER_EN, CAT_VALUE, loc,
-                      FAIL if err else PASS, err or "Identifier accepted by configured validator.",
-                      actual=safe_repr(el["value"]), source="User-configured validator"))
-    return out
+# def check_identifier_rules(index: ElementIndex, cfg: CheckerConfig) -> List[CheckResult]:
+#     """Layer 4: EN 18219 formats. No built-in rules (text unavailable)."""
+#     out: List[CheckResult] = []
+#     for a in ("uniqueProductIdentifier", "economicOperatorId", "facilityId"):
+#         el = index.elements.get(a)
+#         if el is None or a in index.duplicates or not isinstance(el.get("value"), str):
+#             continue
+#         loc = f"submodelElements[idShort={a}].value"
+#         fn = cfg.identifier_validators.get(a)
+#         if fn is None:
+#             out.append(_R(f"ID-{a}", f"EN 18219 identifier format of '{a}'", LAYER_EN, CAT_VALUE, loc,
+#                           SKIP, "Not evaluated: EN 18219:2026 rules are not built in (text not available); "
+#                                 "register a validator in CheckerConfig.identifier_validators.",
+#                           source=SRC_EN))
+#             continue
+#         try:
+#             err = fn(el["value"])
+#         except Exception as exc:                     # a user validator must not crash the run
+#             err = f"validator raised {type(exc).__name__}: {exc}"
+#         out.append(_R(f"ID-{a}", f"EN 18219 identifier format of '{a}'", LAYER_EN, CAT_VALUE, loc,
+#                       FAIL if err else PASS, err or "Identifier accepted by configured validator.",
+#                       actual=safe_repr(el["value"]), source="User-configured validator"))
+#     return out
 
 
 # --------------------------------------------------------------------------
@@ -971,7 +983,7 @@ def run_compliance_checks(path: str, cfg: Optional[CheckerConfig] = None) -> Com
         if data is None:
             rep.validation_complete = False
             rep.incomplete_reason = "File could not be read or parsed."
-            rep.results += _skip_layers((LAYER_AAS, LAYER_IDTA, LAYER_EN), rep.incomplete_reason)
+            rep.results += _skip_layers((LAYER_AAS, LAYER_IDTA), rep.incomplete_reason)
             return rep
 
         res, ok = validate_root_structure(data, cfg)
@@ -979,7 +991,7 @@ def run_compliance_checks(path: str, cfg: Optional[CheckerConfig] = None) -> Com
         if not ok:
             rep.validation_complete = False
             rep.incomplete_reason = "Root structure cannot be safely inspected."
-            rep.results += _skip_layers((LAYER_IDTA, LAYER_EN), rep.incomplete_reason)
+            rep.results += _skip_layers((LAYER_IDTA), rep.incomplete_reason)
             return rep
 
         rep.results += validate_aas_structure(data)
@@ -990,7 +1002,7 @@ def run_compliance_checks(path: str, cfg: Optional[CheckerConfig] = None) -> Com
         if sm is None:
             rep.validation_complete = False
             rep.incomplete_reason = "DPP metadata submodel could not be resolved."
-            rep.results += _skip_layers((LAYER_IDTA, LAYER_EN), rep.incomplete_reason)
+            rep.results += _skip_layers((LAYER_IDTA), rep.incomplete_reason)
             return rep
 
         rep.results += check_submodel_identity(sm, cfg)
@@ -1000,9 +1012,10 @@ def run_compliance_checks(path: str, cfg: Optional[CheckerConfig] = None) -> Com
         rep.results += check_attribute_types(index, cfg)
         rep.results += check_datetime(index, cfg)
         rep.results += check_optional_attributes(index, cfg)
+        rep.results += check_cardinality_consistency(index, cfg)
         rep.results += check_semantic_ids(index, cfg)
         rep.results += check_value_rules(index, cfg)
-        rep.results += check_identifier_rules(index, cfg)
+        # rep.results += check_identifier_rules(index, cfg)
     except Exception as exc:                          # last-resort safety net
         rep.validation_complete = False
         rep.incomplete_reason = f"Internal error: {type(exc).__name__}: {exc}"

@@ -18,7 +18,6 @@ const STEPS = [
   { key: "attrs", title: "Attributes & types", desc: "Element types, value types, structure, optional attributes", table: true },
   { key: "datetime", title: "Date, time & timezone", desc: "lastUpdate is a real date-time with a valid timezone" },
   { key: "semantic", title: "Semantic IDs & allowed values", desc: "semanticIds and granularity match IDTA 02099-1" },
-  { key: "identifiers", title: "Identifier formats (EN 18219)", desc: "Product, operator and facility identifier rules" },
 ];
 
 function stepOf(r) {
@@ -30,7 +29,6 @@ function stepOf(r) {
   if (id.startsWith("TYPE-") || id.startsWith("ELEM-") || id.startsWith("OPT-") || id.startsWith("CARD-") || id === "DPP-IDSHORT") return "attrs";
   if (id.startsWith("DT-")) return "datetime";
   if (id.startsWith("SEM-") || id.startsWith("VAL-") || id === "DPP-SEMANTIC") return "semantic";
-  if (id.startsWith("ID-")) return "identifiers";
   return "aas";
 }
 
@@ -169,7 +167,7 @@ function finishStep(li, step, rs, dpp) {
 
 function layerChips(results) {
   const layers = [["1 JSON", "JSON"], ["2 AAS structure", "AAS structure"],
-                  ["3 IDTA 02099-1", "IDTA 02099-1"], ["4 EN 18223 / EN 18219", "EN 18223 / 18219"]];
+                  ["3 IDTA 02099-1", "IDTA 02099-1"]];
   return h("div", { class: "chips" }, layers.map(([key, label]) => {
     const rs = results.filter((r) => r.layer === key);
     const st = statusOf(rs.filter((r) => !r.check_id.startsWith("NOTRUN")));

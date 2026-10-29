@@ -10,7 +10,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);
   font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-main{max-width:720px;margin:0 auto;padding:56px 20px 80px}
+main{max-width:1100px;margin:0 auto;padding:48px 32px 80px}
 header{margin-bottom:28px}
 h1{font-size:22px;font-weight:600;margin:0 0 2px;letter-spacing:-.01em}
 header p{margin:0;color:var(--muted);font-size:14px}
@@ -109,10 +109,11 @@ ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10p
 
 .brand{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-bottom:22px}
 .logo{height:40px;width:auto;display:block}
-.verdict .tool{margin-left:auto;height:64px;width:auto;flex:none;animation:rise .5s ease both}
+.verdict .tool{margin-left:auto;height:52px;width:auto;flex:none;animation:rise .5s ease both}
 .verdict .text-col{min-width:0}
 @media (max-width:520px){.verdict .tool{display:none}}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes turn{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+[hidden]{display:none!important}
